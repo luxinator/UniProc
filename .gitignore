@@ -1,0 +1,14 @@
+/target
+**/*.o
+.idea
+**/.idea
+**/*.elf
+**/*.img
+/build
+.cache
+src/build
+**/*.bin
+/limine
+**/*.iso
+**/*.hdd
+.gdb_history
