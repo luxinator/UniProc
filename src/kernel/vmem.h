@@ -33,4 +33,6 @@ extern memory_region memory_map[MAX_MEMORY_REGIONS];
 void *get_free_page(void);
 void free_page(void *);
 
+void* malloc(size_t bytes);
+
 #endif //SRC_ARCH_X86_64_VMEM_H_

@@ -26,6 +26,10 @@ kernel_c_obj := $(patsubst src/kernel/%.c, $(build)/kernel/%.o, $(kernel_c_src))
 libc_c_src := $(wildcard src/libc/*.c)
 libc_c_obj := $(patsubst src/libc/%.c, $(build)/libc/%.o, $(libc_c_src))
 
+usr_c_src := $(wildcard src/usr/*.c)
+usr_c_obj := $(patsubst src/usr/%.c, $(build)/usr/%.o, $(libc_c_src))
+
+
 objs := $(assembly_object_files) $(arch_c_obj) $(kernel_c_obj) $(libc_c_obj) $(font_c_obj)
 
 CFLAGS := \
@@ -46,7 +50,8 @@ CFLAGS := \
 	-mno-sse2 \
 	-mno-red-zone \
 	-Wno-gnu-designator \
-	-D DEBUG_
+	-D DEBUG_ \
+	-D ARCH_$(arch)
 
 K_CFLAGS := $(CFLAGS) -I src -D__is_libk -MMD -MP
 
@@ -72,7 +77,7 @@ clean:
 src/limine.h:
 	curl -Lo $@ https://github.com/limine-bootloader/limine/raw/trunk/limine.h
 
-kernel: src/limine.h src/fonts/font.h $(objs)
+kernel: test_proc src/limine.h src/fonts/font.h $(objs)
 	ld.lld $(objs) $(LDFLAGS) -o $(kernel)
 	objcopy --only-keep-debug $(kernel) $(build)/kernel.sym
 	objdump -S $(kernel) > $(build)/kernel.asm
@@ -102,16 +107,28 @@ $(build)/fonts/%.o: src/fonts/%.c
 	@mkdir -p $(shell dirname $@)
 	clang $(K_CFLAGS) -c $< -o $@
 
-# "compile": font file
-src/fonts/font.h:
-	xxd -i $(console_font) $@
 
+# compile usr C files
+$(build)/usr/%.o: src/usr/%.c
+	@mkdir -p $(shell dirname $@)
+	clang $(K_CFLAGS) -c $< -o $@
+
+$(build)/usr/%.o: src/usr/%.c
+	@mkdir -p $(shell dirname $@)
+	clang $(K_CFLAGS) -c $< -o $@
+
+# This is temporary until we have a file system
+# Store test_proc.c as char array
+test_proc:
+	@mkdir -p $(build)/usr/
+	clang -c src/usr/test_proc.c -o $(build)/usr/test_proc
+	xxd -i $(build)/usr/test_proc src/kernel/test_proc.h
 
 
 ### Install and build limine disk/cdrom:
 
 limine:
-	git clone https://github.com/limine-bootloader/limine.git --branch=binary --depth=1
+	git clone https://github.com/limine-bootloader/limine.git --branch=v7.x-binary --depth=1
 	$(MAKE) -C limine \
 		CC="$(HOST_CC)" \
 		CFLAGS="$(HOST_CFLAGS)" \

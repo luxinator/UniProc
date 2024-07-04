@@ -31,6 +31,10 @@ multiprocessing, so why not skip it? CP/M and DOS did alright without.
     - [ ] Multiboot 1
     - [ ] Multiboot 2
 
-# Will it be Multiprocess?
+## Processes
+
+So UniProc uses the ELF and/or `a.out` format for binaries. 
+
+# But will it ever be Multiprocess?
 
 Maybe, if I can get it to work.

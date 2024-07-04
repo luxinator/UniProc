@@ -10,8 +10,15 @@
 #include "interrupts.h"
 #include "cpu.h"
 #include "proc.h"
+#include "test_proc.h"
+#include "elf.h"
 
 void hcf(void);
+
+extern ptrdiff_t elf_load_rel(Elf64_Ehdr *hdr);
+extern bool elf_check_supported(Elf64_Ehdr *hdr);
+extern bool elf_check_file(Elf64_Ehdr *hdr);
+
 
 // Set the base revision to 1, this is recommended as this is the latest
 // base revision described by the Limine boot protocol specification.
@@ -32,12 +39,6 @@ void early_output() {
 		 fb_specs.height,
 		 fb_specs.pitch,
 		 fb_specs.bbp);
-  // Draw a red square
-  for (size_t i = fb_specs.width - 100; i < fb_specs.width; i++) {
-	for (int j = 0; j < 100; j++) {
-	  fb_set_pixel(i, j, 0xff0000);
-	}
-  }
 
   glyph_info info = psf_get_info();
   printf("PSF info char size (%d,%d) \n%d bytes per glyph\n%d bytes per line\n",
@@ -64,6 +65,21 @@ __attribute__((unused)) void _kernel_start(void) {
 
   initialize_interrupts();
   enable_interrupts();
+
+
+  // PARSE ELF
+  Elf64_Ehdr *test_proc_elf = (Elf64_Ehdr *)&build_usr_test_proc;
+  bool isValid = elf_check_file(test_proc_elf);
+  if (!isValid)
+	panic("elf is invalid");
+
+  ptrdiff_t offset = elf_load_rel((Elf64_Ehdr *)test_proc_elf);
+  void *first_instruction = test_proc_elf + offset;
+
+  printf("ELF (%x) relative entry at %x, absolute: %x\n", test_proc_elf, offset, first_instruction);
+
+  proc_slot zero = create_process((uintptr_t)first_instruction, (uintptr_t)NULL);
+  name_process(zero, "TEST PROCESS");
 
   panic("KERNEL RETURNED");
 }
