@@ -139,15 +139,19 @@ limine:
 
 .PHONY: run
 run: $(IMAGE_NAME).iso
-	qemu-system-x86_64 -M q35 -m 2G -cdrom $(IMAGE_NAME).iso -boot d -serial stdio
+	qemu-system-x86_64 -nographic -m 2G -cdrom $(IMAGE_NAME).iso -boot d -serial mon:stdio -drive file=test.img,format=qcow2,index=0,media=disk,if=ide
 
 .PHONY: run-debug
 run-debug: $(IMAGE_NAME).iso
-	qemu-system-x86_64 -M q35 -m 2G -cdrom $(IMAGE_NAME).iso -boot d -serial stdio -s -S
+	qemu-system-x86_64 -nographic -m 2G -cdrom $(IMAGE_NAME).iso -boot d -serial mon:stdio -s -S -drive file=$(IMAGE_NAME).hdd,format=raw,index=0,media=disk,if=ide
 
 .PHONY: run-hdd
 run-hdd: $(IMAGE_NAME).hdd
-	qemu-system-x86_64 -M q35 -m 2G -hda $(IMAGE_NAME).hdd -serial stdio
+	qemu-system-x86_64 -nographic -m 2G -serial mon:stdio -drive file=$(IMAGE_NAME).hdd,format=raw,index=0,media=disk,if=ide
+
+.PHONY: run-full
+run-hdd: $(IMAGE_NAME).hdd
+	qemu-system-x86_64 -m 2G -serial stdio -drive file=$(IMAGE_NAME).hdd,format=raw,index=0,media=disk,if=ide
 
 $(IMAGE_NAME).iso: limine kernel
 	rm -rf iso_root

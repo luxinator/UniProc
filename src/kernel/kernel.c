@@ -69,11 +69,11 @@ __attribute__((unused)) void _kernel_start(void) {
   initialize_interrupts();
   enable_interrupts();
 
-//  start_disk_drives();
+  start_disk_drives();
 
   // PARSE ELF
 
-  panic("KERNEL RETURNED");
+  __asm__("hlt");
 }
 
 [[ clang::noinline ]]

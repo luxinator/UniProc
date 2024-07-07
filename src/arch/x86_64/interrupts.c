@@ -78,8 +78,8 @@ void debug_cpu_dump(cpu_state_t *registers, stack_state_t *stack) {
   printf("rbx: %x\n", registers->rbx);
   printf("rax: %x\n", registers->rax);
 
-  printf("isr_number: %x\n", stack->isr_number);
-  printf("error_code: %x\n", stack->error_code);
+  printf("isr_number: (%d) %x\n", stack->isr_number, stack->isr_number);
+  printf("error_code: (%d) %x \n", stack->error_code, stack->error_code);
   printf("rip: %x\n", stack->rip);
   printf("cs: %x\n", stack->cs);
   printf("rflags: %b\n", stack->rflags);
