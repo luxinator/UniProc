@@ -93,7 +93,6 @@ void irq_set_mask(uint8_t IRQline) {
 
 void irq_clear_mask(uint8_t irq_line) {
   uint16_t port;
-  uint8_t value;
 
   if (irq_line < 8) {
     port = PIC1_DATA;
@@ -101,7 +100,7 @@ void irq_clear_mask(uint8_t irq_line) {
     port = PIC2_DATA;
     irq_line -= 8;
   }
-  value = inb(port);
+  uint8_t value = inb(port);
   value = value & ~(1 << irq_line);
   io_wait();
 

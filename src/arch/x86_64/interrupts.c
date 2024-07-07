@@ -17,6 +17,7 @@
 #include "mem.h"
 #include "kernel/proc.h"
 #include "proc_context.h"
+#include "kernel/timer.h"
 
 extern uintptr_t read_cr2(void);
 
@@ -42,6 +43,7 @@ void initialize_interrupts(void) {
   init_gdt();
   init_idt();
 
+  timerinit();
   // Map PIC IRQs to interrupts 32 to 47
   pic_remap(0x20, 0x28);
 
@@ -87,8 +89,8 @@ void debug_cpu_dump(cpu_state_t *registers, stack_state_t *stack) {
 
 extern void generic_handler(cpu_state_t registers, stack_state_t stack) {
 
-  proc_table[proc_current].context->cpu_state = registers;
-  proc_table[proc_current].context->stack_state = stack;
+//  proc_table[proc_current].context->cpu_state = registers;
+//  proc_table[proc_current].context->stack_state = stack;
 
   // SYSCALL
   if (stack.isr_number==64) {
@@ -113,6 +115,7 @@ extern void generic_handler(cpu_state_t registers, stack_state_t stack) {
 		break;
 
 	  case 32: {
+		timer_tick += 1;
 		break;
 	  }
 	  default: {

@@ -12,12 +12,15 @@
 #include "proc.h"
 #include "test_proc.h"
 #include "elf.h"
+#include "timer.h"
 
 void hcf(void);
 
 extern ptrdiff_t elf_load_rel(Elf64_Ehdr *hdr);
 extern bool elf_check_supported(Elf64_Ehdr *hdr);
 extern bool elf_check_file(Elf64_Ehdr *hdr);
+
+extern void start_disk_drives();
 
 
 // Set the base revision to 1, this is recommended as this is the latest
@@ -66,20 +69,9 @@ __attribute__((unused)) void _kernel_start(void) {
   initialize_interrupts();
   enable_interrupts();
 
+//  start_disk_drives();
 
   // PARSE ELF
-  Elf64_Ehdr *test_proc_elf = (Elf64_Ehdr *)&build_usr_test_proc;
-  bool isValid = elf_check_file(test_proc_elf);
-  if (!isValid)
-	panic("elf is invalid");
-
-  ptrdiff_t offset = elf_load_rel((Elf64_Ehdr *)test_proc_elf);
-  void *first_instruction = test_proc_elf + offset;
-
-  printf("ELF (%x) relative entry at %x, absolute: %x\n", test_proc_elf, offset, first_instruction);
-
-  proc_slot zero = create_process((uintptr_t)first_instruction, (uintptr_t)NULL);
-  name_process(zero, "TEST PROCESS");
 
   panic("KERNEL RETURNED");
 }
